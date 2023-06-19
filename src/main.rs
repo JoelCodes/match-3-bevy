@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-mod match3;
-use crate::match3::Match3Plugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+mod match3;
+use crate::match3::*;
 
 fn main(){
     App::new()
