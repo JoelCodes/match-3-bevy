@@ -8,3 +8,8 @@ pub struct Tile {
     pub column: usize,
     pub row: usize,
 }
+
+#[derive(Component, Default, Debug, Reflect)]
+pub struct GameData {
+    pub grid: Vec<Vec<Option<TileType>>>,
+}

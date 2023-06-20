@@ -1,13 +1,14 @@
 use bevy::{prelude::*};
 
 mod grid;
-use self::grid::TileType;
+use self::grid::*;
 mod resources;
-use self::resources::{GameConfig, GameData};
+use self::resources::*;
 mod components;
-use self::components::Tile;
+use self::components::*;
 mod systems;
-use self::systems::setup;
+use self::systems::*;
+mod bundles;
 
 pub struct Match3Plugin;
 
@@ -19,11 +20,6 @@ impl Plugin for Match3Plugin {
                 rows: 6,
                 columns: 6,
                 cell_size: 80.,
-            })
-            .init_resource::<GameData>()
-            .insert_resource(GameData {
-                grid: vec![],
-                is_ready: false,
             })
             .register_type::<TileType>()
             .register_type::<Tile>()
