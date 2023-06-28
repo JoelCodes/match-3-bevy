@@ -3,8 +3,8 @@
 A digital birdhouse by Joel Shinness
 
 - [X] Ability to see a grid of 6x6 tiles
-- [ ] Derive 6x6 tiles from a Grid vec
-- [ ] Add images (probably from https://kenney.nl/assets/puzzle-pack-2)
+- [X] Derive 6x6 tiles from a Grid vec
+- [X] Add images (probably from https://kenney.nl/assets/puzzle-pack-2)
 - [ ] Add swapping adjacent tiles with touch
 - [ ] Shape recognition / Scoring
 - [ ] Remove tiles and let new ones drop

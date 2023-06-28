@@ -1,14 +1,20 @@
 use bevy::{prelude::*};
 
 mod grid;
-use self::grid::*;
 mod resources;
-use self::resources::*;
 mod components;
-use self::components::*;
 mod systems;
-use self::systems::*;
 mod bundles;
+mod system_sets;
+mod setup;
+mod drag;
+use self::grid::*;
+use self::resources::*;
+use self::components::*;
+use self::setup::*;
+use self::systems::*;
+use self::system_sets::*;
+use self::drag::*;
 
 pub struct Match3Plugin;
 
@@ -25,6 +31,23 @@ impl Plugin for Match3Plugin {
             .register_type::<Tile>()
             .register_type::<GameConfig>()
             .register_type::<GameData>()
-            .add_startup_system(setup);
+            .register_type::<TileIsDragging>()
+            .add_event::<TileDragStart>()
+            .add_event::<TileDragMove>()
+            .add_event::<TileDragCancel>()
+            .add_startup_systems((setup_camera, setup_grid))
+            .configure_set(
+                GameEvents
+                    .after(MouseInput)
+                    .before(Cleanup)
+            )
+            .add_systems((handle_mousebtn, handle_mousemove).in_set(MouseInput))
+            .add_systems(
+                (
+                    handle_tile_drag_start,
+                    handle_tile_drag_cancel,
+                    handle_tile_drag_move
+                ).in_set(GameEvents)
+            ).add_system(reset_tiles.in_set(Cleanup));
     }
 }

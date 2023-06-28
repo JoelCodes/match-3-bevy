@@ -26,7 +26,7 @@ pub fn rand_tile() -> TileType {
 }
 
 pub fn create_grid(rows: usize, columns:usize) -> Vec<Vec<Option<TileType>>> {
-  let mut grid = vec![vec![None; rows]; columns];
+  let mut grid = vec![vec![None; rows.into()]; columns.into()];
   for column in 0..columns {
     for row in 0..rows {
       grid[column][row] = Some(rand_tile());
