@@ -1,8 +1,9 @@
-use bevy::{prelude::*};
+use bevy::prelude::*;
 use bevy_inspector_egui::{InspectorOptions, prelude::ReflectInspectorOptions};
 use rand::Rng;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Reflect, InspectorOptions, FromReflect)]
+
 #[reflect(Hash, InspectorOptions)]
 pub enum TileType {
   Pentagon,
@@ -26,24 +27,29 @@ pub fn rand_tile() -> TileType {
 }
 
 pub fn create_grid(rows: usize, columns:usize) -> Vec<Vec<Option<TileType>>> {
-  let mut grid = vec![vec![None; rows.into()]; columns.into()];
-  for column in 0..columns {
-    for row in 0..rows {
-      grid[column][row] = Some(rand_tile());
-    }
-  }
   loop {
-    let shapes = find_shapes(&grid);
-    if shapes.len() == 0 {
-      break;
-    }
-    for shape in shapes {
-      for (column, row) in shape {
+
+    let mut grid = vec![vec![None; rows.into()]; columns.into()];
+    for column in 0..columns {
+      for row in 0..rows {
         grid[column][row] = Some(rand_tile());
       }
     }
+    loop {
+      let shapes = find_shapes(&grid);
+      if shapes.len() == 0 {
+        break;
+      }
+      for shape in shapes {
+        for (column, row) in shape {
+          grid[column][row] = Some(rand_tile());
+        }
+      }
+    }
+    if has_possible_swaps(&mut grid) {
+      return grid;
+    }
   }
-  grid
 }
 
 // Given a grid, find all the shapes in it
@@ -104,6 +110,82 @@ pub fn find_shapes(grid: &Vec<Vec<Option<TileType>>>) -> Vec<Vec<(usize, usize)>
   shapes
 }
 
+pub fn has_shape(grid: &Vec<Vec<Option<TileType>>>) -> bool {
+  if grid.len() < 3 || grid[0].len() < 3 {
+    return false;
+  }
+  for col in 0..grid.len() {
+    let column = &grid[col];
+    for row in 2..column.len() {
+      let tile_type = column[row];
+      if tile_type == None {
+        continue;
+      }
+      if column[row - 1] == tile_type && column[row - 2] == tile_type {
+        return true;
+      }
+    }
+  }
+  for row in 0..grid[0].len() {
+    for col in 2..grid.len() {
+      let tile_type = grid[col][row];
+      if tile_type == None {
+        continue;
+      }
+      if grid[col - 1][row] == tile_type && grid[col - 2][row] == tile_type {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+pub fn can_swap(grid: &mut Vec<Vec<Option<TileType>>>, tile1: (usize, usize), tile2: (usize, usize)) -> bool {
+  let tile1_type = grid[tile1.0][tile1.1];
+  let tile2_type = grid[tile2.0][tile2.1];
+  grid[tile1.0][tile1.1] = tile2_type;
+  grid[tile2.0][tile2.1] = tile1_type;
+  let result = has_shape(grid);
+  grid[tile1.0][tile1.1] = tile1_type;
+  grid[tile2.0][tile2.1] = tile2_type;
+  result
+}
+
+pub fn swap_tiles(grid: &mut Vec<Vec<Option<TileType>>>, tile1: (usize, usize), tile2: (usize, usize)) -> bool {
+  // Swap tiles in the grid at tile1 and tile2
+  // If the swap results in a shape, return true
+  // If not, swap the tiles back and return false
+  let tile1_type = grid[tile1.0][tile1.1];
+  let tile2_type = grid[tile2.0][tile2.1];
+  grid[tile1.0][tile1.1] = tile2_type;
+  grid[tile2.0][tile2.1] = tile1_type;
+  if has_shape(grid) {
+    true
+  } else {
+    grid[tile1.0][tile1.1] = tile1_type;
+    grid[tile2.0][tile2.1] = tile2_type;
+    false
+  }
+}
+
+pub fn has_possible_swaps(grid: &mut Vec<Vec<Option<TileType>>>) -> bool {
+  // For each tile in the grid, check to see if swapping it with the tile to the right or below it results in a shape.
+  // If so, return true.
+  // If not, return false.
+  for row in 0..grid.len() {
+    for col in 0..grid[row].len() {
+      if col < grid[row].len() - 1  && can_swap(grid, (row, col), (row, col + 1)) {
+        return true;
+      }
+      if row < grid.len() - 1 && can_swap(grid, (row, col), (row + 1, col)) {
+        return true;
+      }
+    }
+  }
+  false
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -157,5 +239,5 @@ mod tests {
     assert_eq!(shapes[1], vec![(0, 2), (1, 2), (2, 2), (3, 2)]);
 
   }
-}
 
+}

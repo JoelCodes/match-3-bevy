@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use super::{components::{GameData, Tile}};
+use super::{components::*, resources::*};
 
 #[derive(Bundle)]
 pub struct GameBundle {

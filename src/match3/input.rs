@@ -1,12 +1,15 @@
 use bevy::{prelude::*, input::{mouse::{MouseButtonInput, MouseMotion}, ButtonState}, window::PrimaryWindow};
 
-use super::{components::*, drag::*};
+use super::{drag::*, resources::*};
+
+#[derive(SystemSet, Clone, Hash, Debug, Eq, PartialEq)]
+pub struct MouseInput;
 
 pub fn handle_mousebtn(
   mut mouse_btn_evr: EventReader<MouseButtonInput>,
   windows: Query<&Window, With<PrimaryWindow>>,
   mut tile_drag_start_evw: EventWriter<TileDragStart>,
-  mut tile_drag_cancel_evw: EventWriter<TileDragCancel>
+  mut tile_drag_end_evw: EventWriter<TileDragEnd>
 ) {
   for evt in mouse_btn_evr.iter() {
     match (evt.button, evt.state) {
@@ -22,7 +25,7 @@ pub fn handle_mousebtn(
         }
       }
       (MouseButton::Left, ButtonState::Released) => {
-        tile_drag_cancel_evw.send(TileDragCancel{});
+        tile_drag_end_evw.send(TileDragEnd{});
       }
       _ => {}
     }
@@ -43,4 +46,12 @@ pub fn handle_mousemove(
       delta_coord: event.delta * Vec2 { x: 1., y: -1. },
     });
   }
+}
+
+pub fn add_input_to_app(
+  app: &mut App
+) -> &mut App {
+  app
+    .configure_set(MouseInput.before(GameEvents))
+    .add_systems((handle_mousebtn, handle_mousemove).in_set(MouseInput))
 }
